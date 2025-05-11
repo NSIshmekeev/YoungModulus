@@ -44,26 +44,30 @@ strains = displacements / L
 # Напряжение
 stresses = forces / A
 
+fig, axs = plt.subplots(2, 1, figsize=(10, 12))
+axs[0].plot(displacements, forces, marker='.', linestyle='-', color='b', markersize=3)
+axs[0].set_title('График зависимости Силы от Перемещения')
+axs[0].set_xlabel('Перемещение (∆L), мм')
+axs[0].set_ylabel('Сила (F), Н')
+axs[0].grid(True)
 
-plt.figure(figsize=(10, 6))
-plt.plot(strains, stresses, marker='.', linestyle='-', color='r')
-plt.title('График зависимости Напряжения от Деформации (Диаграмма растяжения)')
-plt.xlabel('Деформация (ε), безразмерная')
-plt.ylabel('Напряжение (σ), МПа (Н/мм²)')
-plt.grid(True)
+axs[1].plot(strains, stresses, marker='.', linestyle='-', color='r', markersize=3)
+axs[1].set_title('График зависимости Напряжения от Деформации')
+axs[1].set_xlabel('Деформация (ε), безразмерная')
+axs[1].set_ylabel('Напряжение (σ), МПа (Н/мм²)')
+axs[1].grid(True)
 
-valid_indices = np.where((strains > 0) & (stresses > 0) & (strains<0.003))
+valid_indices = np.where(strains<0.002)
 
 if len(strains[valid_indices]) > 1 and len(stresses[valid_indices]) > 1:
-    first_valid_strain = strains[valid_indices[0][0]]
-    first_valid_stress = stresses[valid_indices[0][0]]
-    last_valid_strain = strains[valid_indices[0][-1]]
-    last_valid_stress = stresses[valid_indices[0][-1]]
+    n = len(valid_indices)
+    valid_stress = stresses[valid_indices]
+    valid_strains = strains[valid_indices]
+    y_module = (n * np.sum(valid_stress*valid_strains) - np.sum(valid_strains) * np.sum(valid_stress)) / (n * np.sum(valid_strains**2) - np.sum(valid_strains)**2)
 
-    slope = (last_valid_stress - first_valid_stress) / (last_valid_strain - first_valid_strain)
-    print(slope)
-    plt.plot(strains[valid_indices], slope * strains[valid_indices], 'g--', label=f'E = {slope} МПа')
-    plt.legend()
+
+    axs[1].plot(strains[valid_indices], y_module * strains[valid_indices], 'g--', label=f'E = {y_module} МПа')
+    axs[1].legend()
 else:
     print("\nНедостаточно данных на начальном участке для точного определения модуля Юнга с помощью линейной регрессии.")
     print("Пожалуйста, проверьте данные или измените критерии для выбора линейного участка.")
