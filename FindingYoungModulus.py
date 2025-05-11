@@ -57,7 +57,7 @@ axs[1].set_xlabel('Деформация (ε), безразмерная')
 axs[1].set_ylabel('Напряжение (σ), МПа (Н/мм²)')
 axs[1].grid(True)
 
-valid_indices = np.where(strains<0.002)
+valid_indices = np.where(strains<0.0022)
 
 if len(strains[valid_indices]) > 1 and len(stresses[valid_indices]) > 1:
     n = len(valid_indices)
@@ -67,7 +67,12 @@ if len(strains[valid_indices]) > 1 and len(stresses[valid_indices]) > 1:
 
 
     axs[1].plot(strains[valid_indices], y_module * strains[valid_indices], 'g--', label=f'E = {y_module} МПа')
+
+    # Через две точки
+    y_module_1 = (valid_stress[-1] - valid_stress[0]) / (valid_strains[-1] - valid_strains[0])
+    axs[1].plot(strains[valid_indices], y_module_1 * strains[valid_indices], 'c--', label=f'E_1 через две точки = {y_module_1} МПа')
     axs[1].legend()
+
 else:
     print("\nНедостаточно данных на начальном участке для точного определения модуля Юнга с помощью линейной регрессии.")
     print("Пожалуйста, проверьте данные или измените критерии для выбора линейного участка.")
