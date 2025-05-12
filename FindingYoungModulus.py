@@ -44,38 +44,30 @@ strains = displacements / L
 # Напряжение
 stresses = forces / A
 
-fig, axs = plt.subplots(2, 1, figsize=(10, 12))
-axs[0].plot(displacements, forces, marker='.', linestyle='-', color='b', markersize=3)
-axs[0].set_title('График зависимости Силы от Перемещения')
-axs[0].set_xlabel('Перемещение (∆L), мм')
-axs[0].set_ylabel('Сила (F), Н')
-axs[0].grid(True)
+fig, axs = plt.subplots(2, 2, figsize=(10, 12))
+axs[0][0].plot(displacements, forces, marker='.', linestyle='-', color='b', markersize=3)
+axs[0][0].set_title('График зависимости Силы от Перемещения')
+axs[0][0].set_xlabel('Перемещение (∆L), мм')
+axs[0][0].set_ylabel('Сила (F), Н')
+axs[0][0].grid(True)
 
-axs[1].plot(strains, stresses, marker='.', linestyle='-', color='r', markersize=3)
-axs[1].set_title('График зависимости Напряжения от Деформации')
-axs[1].set_xlabel('Деформация (ε), безразмерная')
-axs[1].set_ylabel('Напряжение (σ), МПа (Н/мм²)')
-axs[1].grid(True)
+axs[1][0].plot(strains, stresses, marker='.', linestyle='-', color='r', markersize=3)
+axs[1][0].set_title('График зависимости Напряжения от Деформации')
+axs[1][0].set_xlabel('Деформация (ε)')
+axs[1][0].set_ylabel('Напряжение (σ), МПа (Н/мм²)')
+axs[1][0].grid(True)
 
-valid_indices = np.where(strains<0.0022)
+indexes = np.where((strains>0))
+E = stresses[indexes] / strains[indexes]
 
-if len(strains[valid_indices]) > 1 and len(stresses[valid_indices]) > 1:
-    n = len(valid_indices)
-    valid_stress = stresses[valid_indices]
-    valid_strains = strains[valid_indices]
-    y_module = (n * np.sum(valid_stress*valid_strains) - np.sum(valid_strains) * np.sum(valid_stress)) / (n * np.sum(valid_strains**2) - np.sum(valid_strains)**2)
+axs[0][1].plot([i for i in range(len(E))], E, marker='.', linestyle='-', color = 'y', markersize=2)
+axs[0][1].set_title('График модуля упругости')
+axs[0][1].set_xlabel('E')
+axs[0][1].grid(True)
 
 
-    axs[1].plot(strains[valid_indices], y_module * strains[valid_indices], 'g--', label=f'E = {y_module} МПа')
-
-    # Через две точки
-    y_module_1 = (valid_stress[-1] - valid_stress[0]) / (valid_strains[-1] - valid_strains[0])
-    axs[1].plot(strains[valid_indices], y_module_1 * strains[valid_indices], 'c--', label=f'E_1 через две точки = {y_module_1} МПа')
-    axs[1].legend()
-
-else:
-    print("\nНедостаточно данных на начальном участке для точного определения модуля Юнга с помощью линейной регрессии.")
-    print("Пожалуйста, проверьте данные или измените критерии для выбора линейного участка.")
-
+print(f'E = {round(np.mean(E[300:]) / 1000, 5)} ГПа')
+fig.delaxes(axs[1, 1])
+fig.tight_layout(pad=2.0)
 plt.show()
 
